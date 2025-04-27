@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Payment Tracker - May 2025 to March 2027</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            overflow-x: scroll;
+        }
+        th, td {
+            border: 1px solid #999;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #333;
+            color: white;
+        }
+        .paid {
+            background-color: #a8e6a1;
+        }
+        .pending {
+            background-color: #f9a7a7;
+        }
+        .btn {
+            padding: 4px 8px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Payment Tracker (May 2025 - March 2027)</h2>
+    <button onclick="resetAllData()" style="margin-bottom: 10px; background-color:red; color:white;">Reset All Data</button>
+
+    <table id="paymentTable">
+        <thead>
+            <tr>
+                <th>Member Name</th>
+                <!-- Months will be added dynamically -->
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Member Rows -->
+        </tbody>
+    </table>
+
+    <script>
+        const members = [];
+        for (let i = 1; i <= 35; i++) {
+            members.push('Member ' + i);
+        }
+
+        const months = [
+            'May 2025', 'June 2025', 'July 2025', 'Aug 2025', 'Sept 2025', 'Oct 2025', 'Nov 2025', 'Dec 2025',
+            'Jan 2026', 'Feb 2026', 'Mar 2026', 'Apr 2026', 'May 2026', 'June 2026', 'July 2026', 'Aug 2026',
+            'Sept 2026', 'Oct 2026', 'Nov 2026', 'Dec 2026', 'Jan 2027', 'Feb 2027', 'Mar 2027'
+        ];
+
+        const tableHead = document.querySelector('#paymentTable thead tr');
+        const tableBody = document.querySelector('#paymentTable tbody');
+
+        let paymentData = {};
+
+        // Load data from localStorage if exists
+        if (localStorage.getItem('paymentData')) {
+            paymentData = JSON.parse(localStorage.getItem('paymentData'));
+        }
+
+        // Add months headers
+        months.forEach(month => {
+            const th = document.createElement('th');
+            th.innerText = month;
+            tableHead.appendChild(th);
+        });
+        const totalTh = document.createElement('th');
+        totalTh.innerText = "Total Paid (₹)";
+        tableHead.appendChild(totalTh);
+
+        // Add member rows
+        members.forEach(member => {
+            const tr = document.createElement('tr');
+            const tdName = document.createElement('td');
+            tdName.innerText = member;
+            tr.appendChild(tdName);
+
+            months.forEach(month => {
+                const td = document.createElement('td');
+                const button = document.createElement('button');
+                button.className = 'btn';
+                button.innerText = 'Mark Paid';
+                button.onclick = () => markPaid(button, member, month);
+
+                td.appendChild(button);
+                td.dataset.paid = "no";
+                tr.appendChild(td);
+
+                // If already paid, update UI
+                if (paymentData[member] && paymentData[member][month] === 'yes') {
+                    td.classList.add('paid');
+                    button.innerText = 'Paid';
+                    td.dataset.paid = "yes";
+                }
+            });
+
+            const totalTd = document.createElement('td');
+            totalTd.innerText = calculateTotal(member);
+            tr.appendChild(totalTd);
+
+            tableBody.appendChild(tr);
+        });
+
+        function markPaid(button, member, month) {
+            const cell = button.parentElement;
+            if (cell.dataset.paid === "no") {
+                cell.classList.add('paid');
+                cell.classList.remove('pending');
+                button.innerText = "Paid";
+                cell.dataset.paid = "yes";
+                savePayment(member, month, "yes");
+            } else {
+                cell.classList.remove('paid');
+                cell.classList.add('pending');
+                button.innerText = "Mark Paid";
+                cell.dataset.paid = "no";
+                savePayment(member, month, "no");
+            }
+            updateTotal(button.closest('tr'), member);
+        }
+
+        function savePayment(member, month, status) {
+            if (!paymentData[member]) {
+                paymentData[member] = {};
+            }
+            paymentData[member][month] = status;
+            localStorage.setItem('paymentData', JSON.stringify(paymentData));
+        }
+
+        function updateTotal(row, member) {
+            const cells = row.querySelectorAll('td');
+            const total = calculateTotal(member);
+            cells[cells.length - 1].innerText = total;
+        }
+
+        function calculateTotal(member) {
+            if (!paymentData[member]) return "₹0";
+            let count = 0;
+            months.forEach(month => {
+                if (paymentData[member][month] === 'yes') {
+                    count++;
+                }
+            });
+            return "₹" + (count * 100);
+        }
+
+        function resetAllData() {
+            if (confirm("Are you sure you want to clear all data?")) {
+                localStorage.removeItem('paymentData');
+                location.reload();
+            }
+        }
+    </script>
+
+</body>
+</html>
