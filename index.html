@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Payment Tracker - May 2025 to March 2027</title>
+    <title>Gowri Amman 2027 Payment Tracker - May 2025 to March 2027</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -23,10 +23,10 @@
             color: white;
         }
         .paid {
-            background-color: #a8e6a1;
+            background-color: #a8e6a1; /* green */
         }
         .pending {
-            background-color: #f9a7a7;
+            background-color: #f9a7a7; /* red */
         }
         .btn {
             padding: 4px 8px;
@@ -36,7 +36,7 @@
 </head>
 <body>
 
-    <h2>Payment Tracker (May 2025 - March 2027)</h2>
+    <h2>Gowri Amman Payment Tracker (May 2025 - March 2027)</h2>
     <button onclick="resetAllData()" style="margin-bottom: 10px; background-color:red; color:white;">Reset All Data</button>
 
     <table id="paymentTable">
@@ -52,10 +52,14 @@
     </table>
 
     <script>
-        const members = [];
-        for (let i = 1; i <= 35; i++) {
-            members.push('Member ' + i);
-        }
+        const members = [
+            "D. Manivannan", "R. Suriya", "P. Gopi", "K. Thulasiraman", "B. J. Vishwa",
+            "P. Chandan", "P. Babu", "J. Prabhu", "S. Dhamodaran", "K. Mohan",
+            "R. Dhamodaran", "G. S. Deepak", "P. Ganesh", "S. Saravanan", "R. Gopi",
+            "K. Vignesh", "M. Surender", "M. Balaji", "J. Balaraj", "S. Naveenkumar",
+            "K. Elango", "R. Yuvaraja", "S. Premkumar", "G. Gokul", "N. Suresh",
+            "K. Murali", "Dinesh T", "Dinesh N", "Sanjai A", "Sanjay Balaji K"
+        ];
 
         const months = [
             'May 2025', 'June 2025', 'July 2025', 'Aug 2025', 'Sept 2025', 'Oct 2025', 'Nov 2025', 'Dec 2025',
@@ -99,11 +103,13 @@
 
                 td.appendChild(button);
                 td.dataset.paid = "no";
+                td.classList.add('pending'); // Initially show pending in red
                 tr.appendChild(td);
 
                 // If already paid, update UI
                 if (paymentData[member] && paymentData[member][month] === 'yes') {
                     td.classList.add('paid');
+                    td.classList.remove('pending');
                     button.innerText = 'Paid';
                     td.dataset.paid = "yes";
                 }
@@ -118,20 +124,23 @@
 
         function markPaid(button, member, month) {
             const cell = button.parentElement;
-            if (cell.dataset.paid === "no") {
-                cell.classList.add('paid');
-                cell.classList.remove('pending');
-                button.innerText = "Paid";
-                cell.dataset.paid = "yes";
-                savePayment(member, month, "yes");
-            } else {
-                cell.classList.remove('paid');
-                cell.classList.add('pending');
-                button.innerText = "Mark Paid";
-                cell.dataset.paid = "no";
-                savePayment(member, month, "no");
+            let action = cell.dataset.paid === "no" ? "mark as Paid" : "mark as Unpaid";
+            if (confirm(`Are you sure you want to ${action} for ${member} - ${month}?`)) {
+                if (cell.dataset.paid === "no") {
+                    cell.classList.add('paid');
+                    cell.classList.remove('pending');
+                    button.innerText = "Paid";
+                    cell.dataset.paid = "yes";
+                    savePayment(member, month, "yes");
+                } else {
+                    cell.classList.remove('paid');
+                    cell.classList.add('pending');
+                    button.innerText = "Mark Paid";
+                    cell.dataset.paid = "no";
+                    savePayment(member, month, "no");
+                }
+                updateTotal(button.closest('tr'), member);
             }
-            updateTotal(button.closest('tr'), member);
         }
 
         function savePayment(member, month, status) {
